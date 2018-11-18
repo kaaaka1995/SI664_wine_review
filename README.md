@@ -12,6 +12,6 @@ This application will use wine reviews data to help users make wine purchase dec
 
 ## Data model
 
-![Screen Shot 2018-11-18 at 5.39.35 PM](/Users/yuan/Desktop/Screen Shot 2018-11-18 at 5.39.35 PM.png)
+./static/img/data_model.png
 
 ## Package Dependencies
