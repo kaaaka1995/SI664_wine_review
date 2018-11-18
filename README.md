@@ -13,5 +13,6 @@ This application will use wine reviews data to help users make wine purchase dec
 ## Data model
 
 ./static/img/data_model.png
+![Alt text](../static/img/data_model.png)
 
 ## Package Dependencies
