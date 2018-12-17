@@ -183,12 +183,45 @@ class Wine(models.Model):
     def __str__(self):
         return self.wine_name
 
-    @property
-    def taster_names(self):
+    # @property
+    # def taster_names(self):
        
+    #     tasters = self.taster.order_by('taster_name')
+
+    #     names = []
+    #     for taster in tasters:
+    #         name = taster.taster_name
+         
+    #         if name is None:
+    #             continue
+    #         taster_twitter = taster.taster_twitter_handle
+
+    #         name_and_code = ''.join([name, ' (', taster_twitter, ')'])
+    #         if name_and_code not in names:
+    #             names.append(name_and_code)
+
+
+    #     return names[0]
+
+    @property
+    def description(self):
+       
+        des = self.winereview_set.select_related('taster').all()
+
+        text_list = []
+        for text in des:
+            temp = text.description 
+         
+            if temp is None:
+                continue
+            
+            if temp not in text_list:
+                text_list.append(temp)
+
         tasters = self.taster.order_by('taster_name')
 
         names = []
+
         for taster in tasters:
             name = taster.taster_name
          
@@ -200,8 +233,18 @@ class Wine(models.Model):
             if name_and_code not in names:
                 names.append(name_and_code)
 
+        finallist=[]
+        for i in range(len(text_list)):
+            if i <= len(names)-1:
+                finallist.append([text_list[i],names[i]])
+            else:
+                finallist.append([text_list[i],None])
 
-        return names[0]
+
+
+        return finallist
+
+
 
 
 
