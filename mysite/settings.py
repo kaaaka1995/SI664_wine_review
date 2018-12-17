@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'winereviews.apps.WinereviewsConfig',
+    'test_without_migrations',
 ]
 
 MIDDLEWARE = [
@@ -125,3 +126,5 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 STATIC_ROOT = os.path.join(BASE_DIR, "static")
+
+TEST_RUNNER = 'winereviews.utils.UnManagedModelTestRunner'
