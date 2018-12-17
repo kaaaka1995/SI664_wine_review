@@ -6,6 +6,16 @@
 <h2>{{wine.wine_name | safe}}</h2>
 
 
+    {% if wine.taster_names %}
+      <div class="row">
+        <div class="col-sm-2">
+          <p>taster</p>
+        </div>
+       <div class="col-sm-10">
+          {{wine.taster_names}}
+        </div>
+      </div>
+    {% endif %}
 
 
 {% if wine.points %}
@@ -51,6 +61,65 @@
     </div>
   </div>
 {% endif %}
+
+{% if wine.region1.region2_id %}
+  <div class="row">
+    <div class="col-sm-2">
+      <p>region2</p>
+    </div>
+   <div class="col-sm-10">
+      {{wine.region1.region2.region2_name}}
+    </div>
+  </div>
+{% endif %}
+
+{% if wine.region1.province_id %}
+  <div class="row">
+    <div class="col-sm-2">
+      <p>province</p>
+    </div>
+   <div class="col-sm-10">
+      {{wine.region1.province.province_name}}
+    </div>
+  </div>
+{% endif %}
+
+{% if wine.region1.province.country_id %}
+  <div class="row">
+    <div class="col-sm-2">
+      <p>country</p>
+    </div>
+   <div class="col-sm-10">
+      {{wine.region1.province.country.country_name}}
+    </div>
+  </div>
+{% endif %}
+
+{% if wine.vineyard_winery_id %}
+    {% if wine.vineyard_winery.vineyard_id %}
+      <div class="row">
+        <div class="col-sm-2">
+          <p>vineyard</p>
+        </div>
+       <div class="col-sm-10">
+          {{wine.vineyard_winery.vineyard.vineyard_name}}
+        </div>
+      </div>
+    {% endif %}
+{% endif %}
+
+{% if wine.vineyard_winery_id %}
+  <div class="row">
+    <div class="col-sm-2">
+      <p>winery</p>
+    </div>
+   <div class="col-sm-10">
+      {{wine.vineyard_winery.winery.winery_name}}
+    </div>
+  </div>
+{% endif %}
+
+
 
 
 

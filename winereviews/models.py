@@ -183,6 +183,27 @@ class Wine(models.Model):
     def __str__(self):
         return self.wine_name
 
+    @property
+    def taster_names(self):
+       
+        tasters = self.taster.order_by('taster_name')
+
+        names = []
+        for taster in tasters:
+            name = taster.taster_name
+         
+            if name is None:
+                continue
+            taster_twitter = taster.taster_twitter_handle
+
+            name_and_code = ''.join([name, ' (', taster_twitter, ')'])
+            if name_and_code not in names:
+                names.append(name_and_code)
+
+
+        return names[0]
+
+
 
 class WineReview(models.Model):
     wine_review_id = models.AutoField(primary_key=True)
