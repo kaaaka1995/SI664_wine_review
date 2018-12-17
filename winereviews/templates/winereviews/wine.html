@@ -1,5 +1,6 @@
 {% extends 'winereviews/base.html' %}
 {% block content %}
+{% if user.is_authenticated %}
 
 <article>
   <header>
@@ -63,5 +64,9 @@
 
   <p>page count: {{ wines.count }}</p>
 </article>
+
+{% else %}
+    <a href="{% url 'login' %}">Log in</a>
+  {% endif %}
 
 {% endblock content %}}

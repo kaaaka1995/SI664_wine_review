@@ -30,12 +30,18 @@
 
       <a class="navbar-brand" href="{% url 'home' %}">SI664 Wine Reviews</a>
 
-      <ul class="navbar-nav">
+      <ul class="navbar-nav mr-auto">
         <li class="nav-item">
           <a class="nav-link" href="{% url 'wines' %}">Wines</a>
         </li>
         <li class="nav-item">
           <a class="nav-link" href="{% url 'about' %}">About</a>
+        </li>
+      </ul>
+
+      <ul class="navbar-nav mr-auto">
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'login' %}">login</a>
         </li>
       </ul>
     </nav>

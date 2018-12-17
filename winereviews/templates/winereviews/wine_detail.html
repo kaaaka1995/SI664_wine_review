@@ -1,5 +1,6 @@
 {% extends 'winereviews/base.html' %}
 {% block content %}
+{% if user.is_authenticated %}
 
 <!-- safe filter on for raw HTML stored in database -->
 
@@ -155,7 +156,9 @@
 
 
 
-
+{% else %}
+    <a href="{% url 'login' %}">Log in</a>
+  {% endif %}
 
 
 
