@@ -1,0 +1,16 @@
+{% extends 'winereviews/base.html' %}
+
+{% load crispy_forms_tags %}
+
+{% block content %}
+
+
+
+  <form method="post">
+    {% csrf_token %}
+    <p>Are you sure you want to delete the wine "{{ wine.wine_name }}"?</p>
+    <button type="submit" class="btn btn-outline-danger">delete</button>
+    &nbsp;<a class="btn btn-outline-secondary" href="{% url 'wine_detail' wine.pk %}">cancel</a>
+  </form>
+
+  {% endblock content %}

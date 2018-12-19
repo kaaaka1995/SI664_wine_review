@@ -6,7 +6,7 @@
 #   * Remove `managed = False` lines if you wish to allow Django to create, modify, and delete the table
 # Feel free to rename the models, but don't rename db_table values or field names.
 from django.db import models
-
+from django.urls import reverse
 
 class Country(models.Model):
     country_id = models.AutoField(primary_key=True)
@@ -156,6 +156,21 @@ class VineyardWinery(models.Model):
         verbose_name = 'Vineyard _ Winery'
         verbose_name_plural = 'Vineyard _ Winery'
 
+class Description(models.Model):
+    description_id = models.AutoField(primary_key=True)
+    description_text = models.TextField(blank=True, null=True)
+
+
+    class Meta:
+        managed = False
+        db_table = 'description'
+        ordering = ['description_text']
+        verbose_name = 'Description'
+        verbose_name_plural = 'Description'
+
+    def __str__(self):
+        return self.description_text
+
 
 class Wine(models.Model):
     wine_id = models.AutoField(primary_key=True)
@@ -168,6 +183,7 @@ class Wine(models.Model):
 
     # Intermediate model (country_area -> heritage_site_jurisdiction <- heritage_site)
     taster= models.ManyToManyField(Taster, through='WineReview')
+    description= models.ManyToManyField(Description, through='WineReview')
 
     class Meta:
         managed = False
@@ -182,6 +198,10 @@ class Wine(models.Model):
 
     def __str__(self):
         return self.wine_name
+
+    def get_absolute_url(self):
+        # return reverse('site_detail', args=[str(self.id)])
+        return reverse('wine_detail', kwargs={'pk': self.pk})
 
     # @property
     # def taster_names(self):
@@ -203,17 +223,36 @@ class Wine(models.Model):
 
     #     return names[0]
 
-    @property
-    def description(self):
+    # @property
+    # def descriptions(self):
        
-        des = self.winereview_set.select_related('taster').all()
+    #     descriptions = self.description.order_by('description_text')
+
+    #     names = []
+    #     for description in descriptions:
+    #         name = description.description_text
+         
+    #         if name is None:
+    #             continue
+           
+    #         if name not in names:
+    #             names.append(name)
+
+
+    #     return names[0]
+
+    @property
+    def descriptions(self):
+       
+        des =  self.description.order_by('description_text')
 
         text_list = []
         for text in des:
-            temp = text.description 
+            temp = text.description_text
          
             if temp is None:
                 continue
+              
             
             if temp not in text_list:
                 text_list.append(temp)
@@ -228,6 +267,8 @@ class Wine(models.Model):
             if name is None:
                 continue
             taster_twitter = taster.taster_twitter_handle
+            if taster_twitter is None:
+                taster_twitter='None'
 
             name_and_code = ''.join([name, ' (', taster_twitter, ')'])
             if name_and_code not in names:
@@ -238,7 +279,7 @@ class Wine(models.Model):
             if i <= len(names)-1:
                 finallist.append([text_list[i],names[i]])
             else:
-                finallist.append([text_list[i],None])
+                finallist.append([text_list[i],'None'])
 
 
 
@@ -246,13 +287,16 @@ class Wine(models.Model):
 
 
 
+ 
+
 
 
 class WineReview(models.Model):
     wine_review_id = models.AutoField(primary_key=True)
     wine = models.ForeignKey(Wine, models.DO_NOTHING)
     taster = models.ForeignKey(Taster, models.DO_NOTHING)
-    description = models.TextField(blank=True, null=True)
+    #description0 = models.TextField(blank=True, null=True)
+    description = models.ForeignKey(Description, models.DO_NOTHING)
 
     class Meta:
         managed = False

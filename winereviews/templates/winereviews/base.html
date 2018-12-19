@@ -26,9 +26,9 @@
   <body>
 
     <!-- A grey horizontal navbar that becomes vertical on small screens -->
-    <nav class="navbar navbar-expand-sm navbar-dark navbar-custom p-0">
+    <nav class="navbar navbar-expand-sm navbar-dark navbar-custom sticky-top px-4 py-2">
 
-      <a class="navbar-brand" href="{% url 'home' %}">SI664 Wine Reviews</a>
+     <!--  <a class="navbar-brand" href="{% url 'home' %}">SI664 Wine Reviews</a>
 
       <ul class="navbar-nav mr-auto">
         <li class="nav-item">
@@ -43,10 +43,34 @@
         <li class="nav-item">
           <a class="nav-link" href="{% url 'login' %}">login</a>
         </li>
+      </ul> -->
+
+
+      <div class="row">
+      <a class="navbar-brand" href="{% url 'home' %}">SI664 Wine Reviews</a>
+        <ul class="navbar-nav">
+
+        <li class="nav-item">
+            <a class="nav-link" href="{% url 'wine_filter' %}">Winefilters</a>
+          </li>
+
+        <li class="nav-item">
+            <a class="nav-link" href="{% url 'wines' %}">Wines</a>
+          </li>
+    
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'about' %}">About</a>
+        </li>
+
+
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'login' %}">login</a>
+        </li>
       </ul>
+      </div>
     </nav>
 
-    <main>
+    <main class="px-4 py-3">
       <div class="container-fluid">
       {% block content %}
       {% endblock content%}
@@ -56,7 +80,7 @@
       </div>
     </main>
 
-    <footer>
+    <footer class="px-4 py-2">
       <p>Copyright &copy; 2018 <a href="mailto:mdyuan@umich.edu">Mengdan Yuan</a></p>
     </footer>
 
