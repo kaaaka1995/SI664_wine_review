@@ -70,8 +70,9 @@ class WineCreateView(generic.View):
         if form.is_valid():
             wine = form.save(commit=False)
             wine.save()
-            #for description in form.cleaned_data['description']:
-            #    WineReview.objects.create(wine=wine, description=description)
+            for description in form.cleaned_data['description']:
+            #for description in form.clean_description_list['description_list']:
+                WineReview.objects.create(wine=wine, description=description)
             return redirect(wine) # shortcut to object's get_absolute_url()
             # return HttpResponseRedirect(site.get_absolute_url())
         return render(request, 'winereviews/wine_new.html', {'form': form})
@@ -130,44 +131,11 @@ class WineUpdateView(generic.UpdateView):
 
         # Current country_area_id values linked to site
         old_ids = WineReview.objects\
-            .values_list('taster_id', flat=True)\
-            .filter(wine_id=wine.wine_id)
-
-        # New countries list
-        new_tasters = form.cleaned_data['taster']
-
-        # TODO can these loops be refactored?
-
-        # New ids
-        new_ids = []
-
-        # Insert new unmatched country entries
-        for taster in new_tasters:
-            new_id = taster.taster_id
-            new_ids.append(new_id)
-            if new_id in old_ids:
-                continue
-            else:
-                WineReview.objects \
-                    .create(wine=wine, taster=taster)
-
-        # Delete old unmatched country entries
-        for old_id in old_ids:
-            if old_id in new_ids:
-                continue
-            else:
-                WineReview.objects \
-                    .filter(wine_id=wine.wine_id, taster_id=old_id) \
-                    .delete()
-
-
-        # Current country_area_id values linked to site
-        old_ids = WineReview.objects\
             .values_list('description_id', flat=True)\
             .filter(wine_id=wine.wine_id)
 
         # New countries list
-        new_tasters = form.cleaned_data['description']
+        new_des = form.cleaned_data['description']
 
         # TODO can these loops be refactored?
 
@@ -175,14 +143,14 @@ class WineUpdateView(generic.UpdateView):
         new_ids = []
 
         # Insert new unmatched country entries
-        for description in new_descriptions:
-            new_id =description.description_id
+        for des in new_des:
+            new_id = des.description_id
             new_ids.append(new_id)
             if new_id in old_ids:
                 continue
             else:
                 WineReview.objects \
-                    .create(wine=wine, taster=taster, description=description)
+                    .create(wine=wine, description=des)
 
         # Delete old unmatched country entries
         for old_id in old_ids:
