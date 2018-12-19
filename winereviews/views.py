@@ -52,10 +52,12 @@ class WineDetailView(generic.DetailView):
         return super().dispatch(*args, **kwargs)
 
 
+
+@method_decorator(login_required, name='dispatch')
 class WineCreateView(generic.View):
     model = Wine
     form_class = WineForm
-    success_message = "New wine created successfully"
+    success_message = "Wine created successfully"
     template_name = 'winereviews/wine_new.html'
     # fields = '__all__' <-- superseded by form_class
     # success_url = reverse_lazy('heritagesites/site_list')
@@ -68,9 +70,8 @@ class WineCreateView(generic.View):
         if form.is_valid():
             wine = form.save(commit=False)
             wine.save()
-            for taster in form.cleaned_data['taster']:
-                #WineReview.objects.create(wine=wine, taster=taster, description=description)
-                WineReview.objects.create(wine=wine, taster=taster)
+            #for description in form.cleaned_data['description']:
+            #    WineReview.objects.create(wine=wine, description=description)
             return redirect(wine) # shortcut to object's get_absolute_url()
             # return HttpResponseRedirect(site.get_absolute_url())
         return render(request, 'winereviews/wine_new.html', {'form': form})
@@ -78,6 +79,33 @@ class WineCreateView(generic.View):
     def get(self, request):
         form = WineForm()
         return render(request, 'winereviews/wine_new.html', {'form': form})
+
+# class WineCreateView(generic.View):
+#     model = Wine
+#     form_class = WineForm
+#     success_message = "New wine created successfully"
+#     template_name = 'winereviews/wine_new.html'
+#     # fields = '__all__' <-- superseded by form_class
+#     # success_url = reverse_lazy('heritagesites/site_list')
+
+#     def dispatch(self, *args, **kwargs):
+#         return super().dispatch(*args, **kwargs)
+
+#     def post(self, request):
+#         form = WineForm(request.POST)
+#         if form.is_valid():
+#             wine = form.save(commit=False)
+#             wine.save()
+#             for taster in form.cleaned_data['taster']:
+#                 #WineReview.objects.create(wine=wine, taster=taster, description=description)
+#                 WineReview.objects.create(wine=wine, taster=taster)
+#             return redirect(wine) # shortcut to object's get_absolute_url()
+#             # return HttpResponseRedirect(site.get_absolute_url())
+#         return render(request, 'winereviews/wine_new.html', {'form': form})
+
+#     def get(self, request):
+#         form = WineForm()
+#         return render(request, 'winereviews/wine_new.html', {'form': form})
 
 
 

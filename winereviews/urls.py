@@ -10,4 +10,5 @@ urlpatterns = [
     path('wines/<int:pk>/delete/', views.WineDeleteView.as_view(), name='wine_delete'),
     path('wines/<int:pk>/update/', views.WineUpdateView.as_view(), name='wine_update'),
     path('winefilter', views.WineFilterView.as_view(),name='wine_filter'),
+    
 ]

@@ -7,6 +7,8 @@
 # Feel free to rename the models, but don't rename db_table values or field names.
 from django.db import models
 from django.urls import reverse
+from django.db.models import  F
+
 
 class Country(models.Model):
     country_id = models.AutoField(primary_key=True)
@@ -27,7 +29,7 @@ class Country(models.Model):
 class Province(models.Model):
     province_id = models.AutoField(primary_key=True)
     province_name = models.CharField(unique=True, max_length=100)
-    country = models.ForeignKey(Country, models.DO_NOTHING, blank=True, null=True)
+    country = models.ForeignKey(Country, on_delete=models.PROTECT, blank=True, null=True)
 
     class Meta:
         managed = False
@@ -43,7 +45,7 @@ class Province(models.Model):
 class Region2(models.Model):
     region2_id = models.AutoField(primary_key=True)
     region2_name = models.CharField(unique=True, max_length=100)
-    province = models.ForeignKey(Province, models.DO_NOTHING, blank=True, null=True)
+    province = models.ForeignKey(Province, on_delete=models.PROTECT, blank=True, null=True)
 
     class Meta:
         managed = False
@@ -60,8 +62,8 @@ class Region2(models.Model):
 class Region1(models.Model):
     region1_id = models.AutoField(primary_key=True)
     region1_name = models.CharField(unique=True, max_length=100)
-    province = models.ForeignKey(Province, models.DO_NOTHING, blank=True, null=True)
-    region2 = models.ForeignKey('Region2', models.DO_NOTHING, blank=True, null=True)
+    province = models.ForeignKey(Province, on_delete=models.PROTECT, blank=True, null=True)
+    region2 = models.ForeignKey('Region2', on_delete=models.PROTECT, blank=True, null=True)
 
     class Meta:
         managed = False
@@ -108,58 +110,58 @@ class Variety(models.Model):
         return self.variety_name
 
 
-class Winery(models.Model):
-    winery_id = models.AutoField(primary_key=True)
-    winery_name = models.CharField(unique=True, max_length=100)
+# class Winery(models.Model):
+#     winery_id = models.AutoField(primary_key=True)
+#     winery_name = models.CharField(unique=True, max_length=100)
 
 
-    class Meta:
-        managed = False
-        db_table = 'winery'
-        ordering = ['winery_name']
-        verbose_name = 'Winery'
-        verbose_name_plural = 'Wineries'
+#     class Meta:
+#         managed = False
+#         db_table = 'winery'
+#         ordering = ['winery_name']
+#         verbose_name = 'Winery'
+#         verbose_name_plural = 'Wineries'
 
-    def __str__(self):
-        return self.winery_name
-
-
-class Vineyard(models.Model):
-    vineyard_id = models.AutoField(primary_key=True)
-    vineyard_name = models.CharField(unique=True, max_length=100)
-
-    winery= models.ManyToManyField(Winery, through='VineyardWinery')
-
-    class Meta:
-        managed = False
-        db_table = 'vineyard'
-        ordering = ['vineyard_name']
-        verbose_name = 'Vineyard'
-        verbose_name_plural = 'Vineyards'
-
-    def __str__(self):
-        return self.vineyard_name
+#     def __str__(self):
+#         return self.winery_name
 
 
+# class Vineyard(models.Model):
+#     vineyard_id = models.AutoField(primary_key=True)
+#     vineyard_name = models.CharField(unique=True, max_length=100)
+
+#     winery= models.ManyToManyField(Winery, through='VineyardWinery')
+
+#     class Meta:
+#         managed = False
+#         db_table = 'vineyard'
+#         ordering = ['vineyard_name']
+#         verbose_name = 'Vineyard'
+#         verbose_name_plural = 'Vineyards'
+
+#     def __str__(self):
+#         return self.vineyard_name
 
 
-class VineyardWinery(models.Model):
-    vineyard_winery_id = models.AutoField(primary_key=True)
-    vineyard = models.ForeignKey(Vineyard, models.DO_NOTHING, blank=True, null=True)
-    winery = models.ForeignKey('Winery', models.DO_NOTHING)
 
 
-    class Meta:
-        managed = False
-        db_table = 'vineyard_winery'
-        ordering = ['vineyard', 'winery']
-        verbose_name = 'Vineyard _ Winery'
-        verbose_name_plural = 'Vineyard _ Winery'
+# class VineyardWinery(models.Model):
+#     vineyard_winery_id = models.AutoField(primary_key=True)
+#     vineyard = models.ForeignKey(Vineyard, on_delete=models.PROTECT, blank=True, null=True)
+#     winery = models.ForeignKey('Winery', on_delete=models.PROTECT)
+
+
+#     class Meta:
+#         managed = False
+#         db_table = 'vineyard_winery'
+#         ordering = ['vineyard', 'winery']
+#         verbose_name = 'Vineyard _ Winery'
+#         verbose_name_plural = 'Vineyard _ Winery'
 
 class Description(models.Model):
     description_id = models.AutoField(primary_key=True)
     description_text = models.TextField(blank=True, null=True)
-
+    taster = models.ForeignKey('Taster', on_delete=models.PROTECT, blank=True, null=True)
 
     class Meta:
         managed = False
@@ -175,19 +177,17 @@ class Description(models.Model):
 class Wine(models.Model):
     wine_id = models.AutoField(primary_key=True)
     wine_name = models.CharField(unique=True, max_length=200)
-    variety = models.ForeignKey(Variety, models.DO_NOTHING)
+    variety = models.ForeignKey(Variety, on_delete=models.PROTECT)
     points = models.IntegerField(blank=True, null=True)
     price = models.DecimalField(max_digits=10, decimal_places=0, blank=True, null=True)
-    region1 = models.ForeignKey(Region1, models.DO_NOTHING, blank=True, null=True)
-    vineyard_winery = models.ForeignKey(VineyardWinery, models.DO_NOTHING, blank=True, null=True)
+    region1 = models.ForeignKey(Region1, on_delete=models.PROTECT, blank=True, null=True)
+    #vineyard_winery = models.ForeignKey(VineyardWinery, on_delete=models.PROTECT, blank=True, null=True)
 
     # Intermediate model (country_area -> heritage_site_jurisdiction <- heritage_site)
-    taster= models.ManyToManyField(Taster, through='WineReview')
+    #taster= models.ManyToManyField(Taster, through='WineReview')
     description= models.ManyToManyField(Description, through='WineReview')
 
-    class Meta:
-        managed = False
-        db_table = 'wine'
+    
 
     class Meta:
         managed = False
@@ -202,6 +202,54 @@ class Wine(models.Model):
     def get_absolute_url(self):
         # return reverse('site_detail', args=[str(self.id)])
         return reverse('wine_detail', kwargs={'pk': self.pk})
+
+    @property
+    def descriptions(self):
+        """
+        Returns a list of UNSD countries/areas (names only) associated with a Heritage Site.
+        Note that not all Heritage Sites are associated with a country/area (e.g., Old City
+        Walls of Jerusalem). In such cases the Queryset will return as <QuerySet [None]> and the
+        list will need to be checked for None or a TypeError (sequence item 0: expected str
+        instance, NoneType found) runtime error will be thrown.
+        :return: string
+        """
+        des = self.description.select_related('taster').order_by('description_text')
+        tasters = self.description.select_related('taster').values(taster_name=F('taster__taster_name'),twitter=F('taster__taster_twitter_handle'),).order_by('taster__taster_name')
+
+
+        names = []
+        for d in des:
+            name = d.description_text
+            if name is None:
+                continue
+            
+            if name not in names:
+                names.append(name)
+
+
+        tlist = []
+
+        for taster in tasters:
+            name = taster['taster_name']
+         
+            if name is None:
+                continue
+            taster_twitter = taster['twitter']
+            if taster_twitter is None:
+                taster_twitter='None'
+
+            name_and_code = ''.join([name, ' (', taster_twitter, ')'])
+            if name_and_code not in tlist :
+                tlist.append(name_and_code)
+
+        finallist=[]
+        for i in range(len(names)):
+            if i <= len(tlist)-1:
+                finallist.append([names[i],tlist[i]])
+            else:
+                finallist.append([names[i],'None'])
+
+        return finallist
 
     # @property
     # def taster_names(self):
@@ -241,49 +289,49 @@ class Wine(models.Model):
 
     #     return names[0]
 
-    @property
-    def descriptions(self):
+    # @property
+    # def descriptions(self):
        
-        des =  self.description.order_by('description_text')
+    #     des =  self.description.order_by('description_text')
 
-        text_list = []
-        for text in des:
-            temp = text.description_text
+    #     text_list = []
+    #     for text in des:
+    #         temp = text.description_text
          
-            if temp is None:
-                continue
+    #         if temp is None:
+    #             continue
               
             
-            if temp not in text_list:
-                text_list.append(temp)
+    #         if temp not in text_list:
+    #             text_list.append(temp)
 
-        tasters = self.taster.order_by('taster_name')
+    #     tasters = self.taster.order_by('taster_name')
 
-        names = []
+    #     names = []
 
-        for taster in tasters:
-            name = taster.taster_name
+    #     for taster in tasters:
+    #         name = taster.taster_name
          
-            if name is None:
-                continue
-            taster_twitter = taster.taster_twitter_handle
-            if taster_twitter is None:
-                taster_twitter='None'
+    #         if name is None:
+    #             continue
+    #         taster_twitter = taster.taster_twitter_handle
+    #         if taster_twitter is None:
+    #             taster_twitter='None'
 
-            name_and_code = ''.join([name, ' (', taster_twitter, ')'])
-            if name_and_code not in names:
-                names.append(name_and_code)
+    #         name_and_code = ''.join([name, ' (', taster_twitter, ')'])
+    #         if name_and_code not in names:
+    #             names.append(name_and_code)
 
-        finallist=[]
-        for i in range(len(text_list)):
-            if i <= len(names)-1:
-                finallist.append([text_list[i],names[i]])
-            else:
-                finallist.append([text_list[i],'None'])
+    #     finallist=[]
+    #     for i in range(len(text_list)):
+    #         if i <= len(names)-1:
+    #             finallist.append([text_list[i],names[i]])
+    #         else:
+    #             finallist.append([text_list[i],'None'])
 
 
 
-        return finallist
+    #     return finallist
 
 
 
@@ -293,10 +341,10 @@ class Wine(models.Model):
 
 class WineReview(models.Model):
     wine_review_id = models.AutoField(primary_key=True)
-    wine = models.ForeignKey(Wine, models.DO_NOTHING)
-    taster = models.ForeignKey(Taster, models.DO_NOTHING)
+    wine = models.ForeignKey(Wine, on_delete=models.CASCADE)
+    #taster = models.ForeignKey(Taster, on_delete=models.CASCADE)
     #description0 = models.TextField(blank=True, null=True)
-    description = models.ForeignKey(Description, models.DO_NOTHING)
+    description = models.ForeignKey(Description, on_delete=models.CASCADE)
 
     class Meta:
         managed = False
@@ -305,7 +353,7 @@ class WineReview(models.Model):
     class Meta:
         managed = False
         db_table = 'wine_review'
-        ordering = ['wine', 'taster']
+        ordering = ['wine', 'description']
         verbose_name = 'Wine _ Review'
         verbose_name_plural = 'Wine _ Review'
 
