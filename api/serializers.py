@@ -43,16 +43,69 @@ class VarietySerializer(serializers.ModelSerializer):
 
 
 class DescriptionSerializer(serializers.ModelSerializer):
+    taster= TasterSerializer(many=False, read_only=True)
 
     class Meta:
         model = Description
         fields = ('description_id', 'description_text','taster_id')
 
+class WineReviewSerializer(serializers.ModelSerializer):
+    wine_id = serializers.ReadOnlyField(source='wine.wine_id')
+    description_id = serializers.ReadOnlyField(source='description.description_id')
+
+    class Meta:
+        model = WineReview
+        fields = ('wine_id', 'description_id')
+
 class WineSerializer(serializers.ModelSerializer):
+    wine_name= serializers.CharField(allow_blank=False, max_length=200)
+
+    variety= VarietySerializer(many=False, read_only=True)
+
+    variety_id=serializers.PrimaryKeyRelatedField(
+        allow_null=False,
+        many=False,
+        write_only=True,
+        queryset=Variety.objects.all(),
+        source='variety'
+        )
+
+    points = serializers.IntegerField(
+        allow_null=False
+    )
+
+    price=  serializers.DecimalField(
+        allow_null=True,
+        max_digits=10,
+        decimal_places=8
+    )
+
+    region1= Region1Serializer(many=False, read_only=True)
+
+    region1_id=serializers.PrimaryKeyRelatedField(
+        allow_null=False,
+        many=False,
+        write_only=True,
+        queryset=Region1.objects.all(),
+        source='region1'
+        )
+
+    wine_review= WineReviewSerializer(
+        source='wine_review_set', # Note use of _set
+        many=True,
+        read_only=True)
+
+    wine_review_ids = serializers.PrimaryKeyRelatedField(
+        many=True,
+        write_only=True,
+        queryset=Description.objects.all(),
+        source='wine_review'
+    )
+
 
     class Meta:
         model = Wine
-        #fields = ('description_id', 'description_text','taster_id')
+        fields = ('wine_id', 'wine_name','variety','variety_id','points','price','region1','region1_id','wine_review','wine_review_ids')
 
 
     def create(self, validated_data):

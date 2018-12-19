@@ -8,7 +8,7 @@ class WineViewSet(viewsets.ModelViewSet):
     """
     This ViewSet provides both 'list' and 'detail' views.
     """
-    queryset = Wine.objects.select_related('region1').order_by('wine_name')
+    queryset = Wine.objects.select_related().order_by('wine_name')
     serializer_class = WineSerializer
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
 

@@ -179,7 +179,7 @@ class Wine(models.Model):
     wine_name = models.CharField(unique=True, max_length=200)
     variety = models.ForeignKey(Variety, on_delete=models.PROTECT)
     points = models.IntegerField(blank=True, null=True)
-    price = models.DecimalField(max_digits=10, decimal_places=0, blank=True, null=True)
+    price = models.DecimalField(max_digits=10, decimal_places=8, blank=True, null=True)
     region1 = models.ForeignKey(Region1, on_delete=models.PROTECT, blank=True, null=True)
     #vineyard_winery = models.ForeignKey(VineyardWinery, on_delete=models.PROTECT, blank=True, null=True)
 
