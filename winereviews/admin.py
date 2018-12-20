@@ -81,11 +81,11 @@ class VarietyAdmin(admin.ModelAdmin):
     list_display = ['variety_name']
     ordering = ['variety_name']
 
-@admin.register(models.Description)
-class DescriptionAdmin(admin.ModelAdmin):
-    fields = ['description_text','taster']
-    list_display = ['description_text','taster']
-    ordering = ['description_text']
+# @admin.register(models.Description)
+# class DescriptionAdmin(admin.ModelAdmin):
+#     fields = ['description_text','taster']
+#     list_display = ['description_text','taster']
+#     ordering = ['description_text']
 
 # @admin.register(models.Winery)
 # class WineryAdmin(admin.ModelAdmin):

@@ -158,20 +158,20 @@ class Variety(models.Model):
 #         verbose_name = 'Vineyard _ Winery'
 #         verbose_name_plural = 'Vineyard _ Winery'
 
-class Description(models.Model):
-    description_id = models.AutoField(primary_key=True)
-    description_text = models.TextField(blank=True, null=True)
-    taster = models.ForeignKey('Taster', on_delete=models.PROTECT, blank=True, null=True)
+# class Description(models.Model):
+#     description_id = models.AutoField(primary_key=True)
+#     description_text = models.TextField(blank=True, null=True)
+#     taster = models.ForeignKey('Taster', on_delete=models.PROTECT, blank=True, null=True)
 
-    class Meta:
-        managed = False
-        db_table = 'description'
-        ordering = ['description_text']
-        verbose_name = 'Description'
-        verbose_name_plural = 'Description'
+#     class Meta:
+#         managed = False
+#         db_table = 'description'
+#         ordering = ['description_text']
+#         verbose_name = 'Description'
+#         verbose_name_plural = 'Description'
 
-    def __str__(self):
-        return self.description_text
+#     def __str__(self):
+#         return self.description_text
 
 
 class Wine(models.Model):
@@ -184,8 +184,8 @@ class Wine(models.Model):
     #vineyard_winery = models.ForeignKey(VineyardWinery, on_delete=models.PROTECT, blank=True, null=True)
 
     # Intermediate model (country_area -> heritage_site_jurisdiction <- heritage_site)
-    #taster= models.ManyToManyField(Taster, through='WineReview')
-    description= models.ManyToManyField(Description, through='WineReview')
+    taster = models.ManyToManyField(Taster, through='WineReview', blank=True, related_name='wines')
+    #description= models.ManyToManyField(Description, through='WineReview')
 
     
 
@@ -203,38 +203,31 @@ class Wine(models.Model):
         # return reverse('site_detail', args=[str(self.id)])
         return reverse('wine_detail', kwargs={'pk': self.pk})
 
-    @property
     def descriptions(self):
-        """
-        Returns a list of UNSD countries/areas (names only) associated with a Heritage Site.
-        Note that not all Heritage Sites are associated with a country/area (e.g., Old City
-        Walls of Jerusalem). In such cases the Queryset will return as <QuerySet [None]> and the
-        list will need to be checked for None or a TypeError (sequence item 0: expected str
-        instance, NoneType found) runtime error will be thrown.
-        :return: string
-        """
-        des = self.description.select_related('taster').order_by('description_text')
-        tasters = self.description.select_related('taster').values(taster_name=F('taster__taster_name'),twitter=F('taster__taster_twitter_handle'),).order_by('taster__taster_name')
 
+        des = self.winereview_set.select_related('taster').all()
 
-        names = []
-        for d in des:
-            name = d.description_text
-            if name is None:
+        text_list = []
+        for text in des:
+            temp = text.description_text
+
+            if temp is None:
                 continue
-            
-            if name not in names:
-                names.append(name)
 
+            if temp not in text_list:
+                text_list.append(temp)
 
+        tasters = self.taster.order_by('taster_name')
+
+        
         tlist = []
 
         for taster in tasters:
-            name = taster['taster_name']
+            name = taster.taster_name
          
             if name is None:
                 continue
-            taster_twitter = taster['twitter']
+            taster_twitter = taster.taster_twitter_handle
             if taster_twitter is None:
                 taster_twitter='None'
 
@@ -243,13 +236,63 @@ class Wine(models.Model):
                 tlist.append(name_and_code)
 
         finallist=[]
-        for i in range(len(names)):
+        for i in range(len(text_list)):
             if i <= len(tlist)-1:
-                finallist.append([names[i],tlist[i]])
+                finallist.append([text_list[i],tlist[i]])
             else:
-                finallist.append([names[i],'None'])
+                finallist.append([text_list[i],None])
+
+
 
         return finallist
+
+    # @property
+    # def descriptions(self):
+    #     """
+    #     Returns a list of UNSD countries/areas (names only) associated with a Heritage Site.
+    #     Note that not all Heritage Sites are associated with a country/area (e.g., Old City
+    #     Walls of Jerusalem). In such cases the Queryset will return as <QuerySet [None]> and the
+    #     list will need to be checked for None or a TypeError (sequence item 0: expected str
+    #     instance, NoneType found) runtime error will be thrown.
+    #     :return: string
+    #     """
+    #     des = self.description.select_related('taster').order_by('description_text')
+    #     tasters = self.description.select_related('taster').values(taster_name=F('taster__taster_name'),twitter=F('taster__taster_twitter_handle'),).order_by('taster__taster_name')
+
+
+    #     names = []
+    #     for d in des:
+    #         name = d.description_text
+    #         if name is None:
+    #             continue
+            
+    #         if name not in names:
+    #             names.append(name)
+
+
+    #     tlist = []
+
+    #     for taster in tasters:
+    #         name = taster['taster_name']
+         
+    #         if name is None:
+    #             continue
+    #         taster_twitter = taster['twitter']
+    #         if taster_twitter is None:
+    #             taster_twitter='None'
+
+    #         name_and_code = ''.join([name, ' (', taster_twitter, ')'])
+    #         if name_and_code not in tlist :
+    #             tlist.append(name_and_code)
+
+    #     finallist=[]
+    #     for i in range(len(names)):
+    #         if i <= len(tlist)-1:
+    #             finallist.append([names[i],tlist[i]])
+    #         else:
+    #             finallist.append([names[i],'None'])
+
+    #     return finallist
 
     # @property
     # def taster_names(self):
@@ -344,7 +387,8 @@ class WineReview(models.Model):
     wine = models.ForeignKey(Wine, on_delete=models.CASCADE)
     #taster = models.ForeignKey(Taster, on_delete=models.CASCADE)
     #description0 = models.TextField(blank=True, null=True)
-    description = models.ForeignKey(Description, on_delete=models.CASCADE)
+    taster = models.ForeignKey(Taster, on_delete=models.CASCADE)
+    description_text=models.TextField(blank=True, null=True)
 
     class Meta:
         managed = False
@@ -353,7 +397,7 @@ class WineReview(models.Model):
     class Meta:
         managed = False
         db_table = 'wine_review'
-        ordering = ['wine', 'description']
+        ordering = ['wine', 'taster']
         verbose_name = 'Wine _ Review'
         verbose_name_plural = 'Wine _ Review'
 

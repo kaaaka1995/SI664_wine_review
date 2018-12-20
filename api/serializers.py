@@ -42,20 +42,20 @@ class VarietySerializer(serializers.ModelSerializer):
         fields = ('variety_id', 'variety_name')
 
 
-class DescriptionSerializer(serializers.ModelSerializer):
-    taster= TasterSerializer(many=False, read_only=True)
+# class DescriptionSerializer(serializers.ModelSerializer):
+#     taster= TasterSerializer(many=False, read_only=True)
 
-    class Meta:
-        model = Description
-        fields = ('description_id', 'description_text','taster_id')
+#     class Meta:
+#         model = Description
+#         fields = ('description_id', 'description_text','taster_id')
 
 class WineReviewSerializer(serializers.ModelSerializer):
     wine_id = serializers.ReadOnlyField(source='wine.wine_id')
-    description_id = serializers.ReadOnlyField(source='description.description_id')
+    taster_id = serializers.ReadOnlyField(source='taster.taster_id')
 
     class Meta:
         model = WineReview
-        fields = ('wine_id', 'description_id')
+        fields = ('wine_id', 'taster_id')
 
 class WineSerializer(serializers.ModelSerializer):
     wine_name= serializers.CharField(allow_blank=False, max_length=200)
@@ -98,7 +98,7 @@ class WineSerializer(serializers.ModelSerializer):
     wine_review_ids = serializers.PrimaryKeyRelatedField(
         many=True,
         write_only=True,
-        queryset=Description.objects.all(),
+        queryset=Taster.objects.all(),
         source='wine_review'
     )
 
@@ -122,85 +122,71 @@ class WineSerializer(serializers.ModelSerializer):
 
         # print(validated_data)
 
-        countries = validated_data.pop('heritage_site_jurisdiction')
-        site = HeritageSite.objects.create(**validated_data)
+        wines = validated_data.pop('wine_review')
+        wine = Wine.objects.create(**validated_data)
 
-        if countries is not None:
-            for country in countries:
-                HeritageSiteJurisdiction.objects.create(
-                    heritage_site_id=site.heritage_site_id,
-                    country_area_id=country.country_area_id
+        if tasters is not None:
+            for taster in tasters:
+                WineReview.objects.create(
+                    wine_id=wine.wine_id,
+                    taster_id=taster.taster_id
                 )
-        return site
+        return wine
 
     def update(self, instance, validated_data):
         # site_id = validated_data.pop('heritage_site_id')
-        site_id = instance.heritage_site_id
-        new_countries = validated_data.pop('heritage_site_jurisdiction')
+        wine_id = instance.wine_id
+        new_tasters = validated_data.pop('wine_review')
 
-        instance.site_name = validated_data.get(
-            'site_name',
-            instance.site_name
+        instance.wine_name = validated_data.get(
+            'wine_name',
+            instance.wine_name
         )
-        instance.description = validated_data.get(
-            'description',
-            instance.description
+        instance.variety_id = validated_data.get(
+            'variety_id',
+            instance.variety_id
         )
-        instance.justification = validated_data.get(
-            'justification',
+
+        instance.region1_id = validated_data.get(
+            'region1_id',
+            instance.region1_id
+        )
+        instance.points = validated_data.get(
+            'points',
             instance.justification
         )
-        instance.date_inscribed = validated_data.get(
-            'date_inscribed',
+        instance.price = validated_data.get(
+            'price',
             instance.date_inscribed
         )
-        instance.longitude = validated_data.get(
-            'longitude',
-            instance.longitude
-        )
-        instance.latitude = validated_data.get(
-            'latitude',
-            instance.latitude
-        )
-        instance.area_hectares = validated_data.get(
-            'area_hectares',
-            instance.area_hectares
-        )
-        instance.heritage_site_category_id = validated_data.get(
-            'heritage_site_category_id',
-            instance.heritage_site_category_id
-        )
-        instance.transboundary = validated_data.get(
-            'transboundary',
-            instance.transboundary
-        )
+        
         instance.save()
 
         # If any existing country/areas are not in updated list, delete them
         new_ids = []
-        old_ids = HeritageSiteJurisdiction.objects \
-            .values_list('country_area_id', flat=True) \
-            .filter(heritage_site_id__exact=site_id)
+        old_ids = WineReview.objects \
+            .values_list('taster_id', flat=True) \
+            .filter(wine_id__exact=wine_id)
 
         # TODO Insert may not be required (Just return instance)
 
         # Insert new unmatched country entries
-        for country in new_countries:
-            new_id = country.country_area_id
+        for taster in new_tasters:
+            new_id = taster.taster_id
             new_ids.append(new_id)
             if new_id in old_ids:
                 continue
             else:
-                HeritageSiteJurisdiction.objects \
-                    .create(heritage_site_id=site_id, country_area_id=new_id)
+                WineReview.objects \
+                    .create(wine_id=wine_id, taster_id=new_id)
 
         # Delete old unmatched country entries
         for old_id in old_ids:
             if old_id in new_ids:
                 continue
             else:
-                HeritageSiteJurisdiction.objects \
-                    .filter(heritage_site_id=site_id, country_area_id=old_id) \
+                WineReview.objects \
+                    .filter(wine_id=wine_id, taster_id=old_id) \
                     .delete()
 
         return instance

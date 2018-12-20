@@ -70,9 +70,9 @@ class WineCreateView(generic.View):
         if form.is_valid():
             wine = form.save(commit=False)
             wine.save()
-            #for description in form.cleaned_data['description']:
-            for description in form.clean_description_list['description_list']:
-                WineReview.objects.create(wine=wine, description=description)
+            for taster in form.cleaned_data['taster']:
+            # for description in form.clean_description_list['description_list']:
+                WineReview.objects.create(wine=wine, taster=taster)
             return redirect(wine) # shortcut to object's get_absolute_url()
             # return HttpResponseRedirect(site.get_absolute_url())
         return render(request, 'winereviews/wine_new.html', {'form': form})
@@ -131,11 +131,11 @@ class WineUpdateView(generic.UpdateView):
 
         # Current country_area_id values linked to site
         old_ids = WineReview.objects\
-            .values_list('description_id', flat=True)\
+            .values_list('taster_id', flat=True)\
             .filter(wine_id=wine.wine_id)
 
         # New countries list
-        new_des = form.cleaned_data['description']
+        new_taster = form.cleaned_data['taster']
 
         # TODO can these loops be refactored?
 
@@ -143,14 +143,14 @@ class WineUpdateView(generic.UpdateView):
         new_ids = []
 
         # Insert new unmatched country entries
-        for des in new_des:
-            new_id = des.description_id
+        for tas in new_taster:
+            new_id = tas.taster_id
             new_ids.append(new_id)
             if new_id in old_ids:
                 continue
             else:
                 WineReview.objects \
-                    .create(wine=wine, description=des)
+                    .create(wine=wine, taster=tas)
 
         # Delete old unmatched country entries
         for old_id in old_ids:
@@ -158,7 +158,7 @@ class WineUpdateView(generic.UpdateView):
                 continue
             else:
                 WineReview.objects \
-                    .filter(wine_id=wine.wine_id, description_id=old_id) \
+                    .filter(wine_id=wine.wine_id, taster_id=old_id) \
                     .delete()
 
         return HttpResponseRedirect(wine.get_absolute_url())
@@ -186,8 +186,8 @@ class WineDeleteView(generic.DeleteView):
 
         self.object.delete()
 
-        return HttpResponseRedirect(self.get_success_url())
-
+        return redirect('wines')
+        #return HttpResponseRedirect(self.get_success_url())
 
 class WineFilterView(FilterView):
     filterset_class = WineFilter
