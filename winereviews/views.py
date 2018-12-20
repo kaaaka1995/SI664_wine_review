@@ -70,8 +70,8 @@ class WineCreateView(generic.View):
         if form.is_valid():
             wine = form.save(commit=False)
             wine.save()
-            for description in form.cleaned_data['description']:
-            #for description in form.clean_description_list['description_list']:
+            #for description in form.cleaned_data['description']:
+            for description in form.clean_description_list['description_list']:
                 WineReview.objects.create(wine=wine, description=description)
             return redirect(wine) # shortcut to object's get_absolute_url()
             # return HttpResponseRedirect(site.get_absolute_url())
