@@ -50,63 +50,13 @@ class VarietySerializer(serializers.ModelSerializer):
 #         fields = ('description_id', 'description_text','taster_id')
 
 class WineReviewSerializer(serializers.ModelSerializer):
+
     wine_id = serializers.ReadOnlyField(source='wine.wine_id')
     taster_id = serializers.ReadOnlyField(source='taster.taster_id')
 
     class Meta:
         model = WineReview
         fields = ('wine_id', 'taster_id','description_text')
-
-class WineSerializer(serializers.ModelSerializer):
-    wine_name= serializers.CharField(allow_blank=False, max_length=200)
-
-    variety= VarietySerializer(many=False, read_only=True)
-
-    variety_id=serializers.PrimaryKeyRelatedField(
-        allow_null=False,
-        many=False,
-        write_only=True,
-        queryset=Variety.objects.all(),
-        source='variety'
-        )
-
-    points = serializers.IntegerField(
-        allow_null=False
-    )
-
-    price=  serializers.DecimalField(
-        allow_null=True,
-        max_digits=10,
-        decimal_places=8
-    )
-
-    region1= Region1Serializer(many=False, read_only=True)
-
-    region1_id=serializers.PrimaryKeyRelatedField(
-        allow_null=False,
-        many=False,
-        write_only=True,
-        queryset=Region1.objects.all(),
-        source='region1'
-        )
-
-    wine_review= WineReviewSerializer(
-        source='wine_review_set', # Note use of _set
-        many=True,
-        read_only=True)
-
-    wine_review_ids = serializers.PrimaryKeyRelatedField(
-        many=True,
-        write_only=True,
-        queryset=Taster.objects.all(),
-        source='wine_review'
-    )
-
-
-    class Meta:
-        model = Wine
-        fields = ('wine_id', 'wine_name','variety','variety_id','points','price','region1','region1_id','wine_review','wine_review_ids')
-
 
     def create(self, validated_data):
         """
@@ -122,16 +72,19 @@ class WineSerializer(serializers.ModelSerializer):
 
         # print(validated_data)
 
-        wines = validated_data.pop('wine_review')
-        wine = Wine.objects.create(**validated_data)
+        reviews = validated_data.pop('wine_review')
+        winereview = WineReview.objects.create(**validated_data)
 
-        if tasters is not None:
-            for taster in tasters:
-                WineReview.objects.create(
-                    wine_id=wine.wine_id,
-                    taster_id=taster.taster_id
-                )
-        return wine
+        if reviews is not None:
+            # for taster in tasters:
+            #     WineReview.objects.create(
+            #         wine_review_id=winereview.wine_review_id,
+            #         taster_id=taster.taster_id
+            #     )
+            for review in reviews:
+                WineReview.objects.create(**review)
+
+        return winereview
 
     def update(self, instance, validated_data):
         # site_id = validated_data.pop('heritage_site_id')
@@ -190,3 +143,56 @@ class WineSerializer(serializers.ModelSerializer):
                     .delete()
 
         return instance
+
+class WineSerializer(serializers.ModelSerializer):
+    wine_name= serializers.CharField(allow_blank=False, max_length=200)
+
+    variety= VarietySerializer(many=False, read_only=True)
+
+    variety_id=serializers.PrimaryKeyRelatedField(
+        allow_null=False,
+        many=False,
+        write_only=True,
+        queryset=Variety.objects.all(),
+        source='variety'
+        )
+
+    points = serializers.IntegerField(
+        allow_null=False
+    )
+
+    price=  serializers.DecimalField(
+        allow_null=True,
+        max_digits=10,
+        decimal_places=8
+    )
+
+    region1= Region1Serializer(many=False, read_only=True)
+
+    region1_id=serializers.PrimaryKeyRelatedField(
+        allow_null=False,
+        many=False,
+        write_only=True,
+        queryset=Region1.objects.all(),
+        source='region1'
+        )
+
+    wine_review= WineReviewSerializer(
+        source='wine_review_set', # Note use of _set
+        many=True,
+        read_only=True)
+
+    wine_review_ids = serializers.PrimaryKeyRelatedField(
+        many=True,
+        write_only=True,
+        queryset=Taster.objects.all(),
+        source='wine_review'
+    )
+
+
+    class Meta:
+        model = Wine
+        fields = ('wine_id', 'wine_name','variety','variety_id','points','price','region1','region1_id','wine_review','wine_review_ids')
+
+
+    
